@@ -400,7 +400,75 @@ async def get_route_weather(lat: float, lon: float) -> dict | None:
 
 ## §6 — Spec-Driven Development (SDD) Enforcement
 
-### 6.1 — Pre-Coding Alignment Protocol
+### Why this exists
+
+This project uses Spec-Driven Development (SDD). Specifications under `specs/` are the **source of truth** for intended system behavior. Do not write code without a corresponding spec file.
+
+---
+
+### 6.1 — Spec Status
+
+| Status | Meaning |
+| --- | --- |
+| `[STABLE]` | Implemented and verified |
+| `[PARTIAL]` | Implemented but incomplete or being changed |
+| `[PLANNED]` | Not yet implemented |
+
+Do not mark a requirement `[STABLE]` without verification and an **Implementation Map**.
+
+---
+
+### 6.2 — Phased Execution Order
+
+Each spec belongs to a numbered phase with clear dependencies. Phases execute in order; a phase cannot begin until its dependencies are `[STABLE]`.
+
+| Phase | Spec | Target Module | Priority | Depends On | Unlocks |
+|---|---|---|---|---|---|
+| **1** | `specs/architecture.md` | `src/core/` | P0 — Foundation | None | 2, 3 |
+| **2** | `specs/database.md` | `src/database/`, `docker/` | P0 — Data Layer | Phase 1 | 3, 5 |
+| **3** | `specs/tools.md` | `src/tools/` | P0 — Execution Tools | Phase 1 & 2 | 4, 6 |
+| **4** | `specs/rag.md` | `src/rag/` | P1 — Vector RAG | Phase 1 | 6 |
+| **5** | `specs/audit.md` | `src/database/audit.py` | P0 — Security & Audit | Phase 2 | 6 |
+| **6** | `specs/ui.md` | `src/ui/` | P0 — Presentation | Phases 3, 4, 5 | None |
+
+> **Reading a spec:** Every spec file contains a header block showing its Phase number, Priority, Module path, Dependencies, and what it Unlocks.
+
+---
+
+### 6.3 — Requirement Specification Format
+
+Every requirement in a specification uses this canonical structure:
+
+#### REQ-XXX-NNN — Short requirement title
+
+**Requirement:** What must be true.
+
+**Rationale:** Why this requirement exists.
+
+**Acceptance Criteria:**
+- Concrete, checkable condition.
+- Concrete, checkable condition.
+
+**Dependencies:** Related components, requirements, or services.
+
+<details>
+<summary><strong>📂 Implementation Map</strong> (Required when Status is <code>[STABLE]</code>)</summary>
+
+**Source:** [src/path/to/file.py](file:///path/to/file.py)
+
+| # | Component | Type | Description |
+|---|-----------|------|-------------|
+| 1 | [SymbolName](file:///path/to/file.py#L12) | `class` / `method` / `function` | Short description of symbol responsibility |
+
+</details>
+
+**Tests:** `path/to/test.py::test_name` or `none yet`.
+
+**Status:** `[STABLE]` / `[PARTIAL]` / `[PLANNED]`
+
+---
+
+### 6.4 — Pre-Coding Alignment Protocol
 
 Before writing any new module or modifying an existing one, the agent MUST:
 
@@ -415,7 +483,9 @@ Before writing any new module or modifying an existing one, the agent MUST:
 # Arch-status: Aligned with FDE_VIEWS Zero-Mutation constraint (§5.1)
 ```
 
-### 6.2 — Tool Docstring Standard (MANDATORY)
+---
+
+### 6.5 — Tool Docstring Standard (MANDATORY)
 
 Every LangGraph tool function MUST include a structured docstring. The LLM uses these docstrings to decide when and how to invoke each tool. Incomplete docstrings will cause incorrect tool routing.
 
@@ -450,18 +520,22 @@ def tool_function(param: InputType) -> OutputType:
     """
 ```
 
-### 6.3 — New Feature Addition Checklist
+---
+
+### 6.6 — New Feature Addition Checklist
 
 When adding any new capability:
 
 - [ ] Spec file updated in `specs/` before code is written
-- [ ] Tool docstring complete (§6.2 format)
+- [ ] Spec status updated (`[PLANNED]` → `[PARTIAL]` → `[STABLE]`)
+- [ ] Tool docstring complete (§6.5 format)
 - [ ] `validate_sql_safety()` called if any SQL is generated
 - [ ] Audit log entry written before function returns
 - [ ] Graceful degradation implemented for all external I/O
 - [ ] `@st.cache_resource` used for any model or graph object
 - [ ] Unit test added in `tests/unit/`
 - [ ] `src/core/exceptions.py` updated with any new exception types
+
 
 ---
 
