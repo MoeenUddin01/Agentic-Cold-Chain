@@ -54,6 +54,22 @@ An enterprise-grade, **100% local, zero-cost, agentic orchestration platform** f
 
 ---
 
+## 📐 Spec-Driven Development (SDD)
+
+This project strictly adheres to **Spec-Driven Development**. All intended system behavior is documented in the `specs/` directory, which acts as the **source of truth**.
+
+The development follows a phased execution order:
+1. **Foundation** (`specs/architecture.md`)
+2. **Data Layer** (`specs/database.md`)
+3. **Execution Tools** (`specs/tools.md`)
+4. **Vector RAG** (`specs/rag.md`)
+5. **Security & Audit** (`specs/audit.md`)
+6. **Presentation** (`specs/ui.md`)
+
+Code is only written or modified after the corresponding specification is marked `[STABLE]` and verified.
+
+---
+
 ## 🛠️ Tech Stack & Environment
 
 | Component | Technology | Description |
