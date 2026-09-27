@@ -174,13 +174,18 @@ docker run -v mssql_data:/var/opt/mssql \
   -d mcr.microsoft.com/mssql/server:2022-latest
 ```
 
-Initialize the database views and seed data:
+**Install the Microsoft ODBC 18 Driver (Ubuntu/Linux):**
+```bash
+curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc > /dev/null
+curl -fsSL https://packages.microsoft.com/config/ubuntu/24.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list > /dev/null
+sudo apt-get update
+sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev
+```
+
+Initialize the database schema and ingest raw telemetry data:
 
 ```bash
-docker exec -i cold-chain-mssql \
-  /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U SA -P "YourStrong!Passw0rd" \
-  -i /docker/mssql-init/init.sql -No
+uv run python scripts/ingest_telemetry.py
 ```
 
 ---
